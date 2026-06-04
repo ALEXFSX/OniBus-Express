@@ -6,13 +6,15 @@ interface SearchFields {
   origin: string
   destination: string
   departureDate: string
+  duracaoEstimadaMinutos: number
 }
 
 interface SearchFormProps {
   onSearch: (fields: SearchFields) => void
+  isLoading?: boolean
 }
 
-export default function SearchForm({ onSearch }: SearchFormProps) {
+export default function SearchForm({ onSearch, isLoading = false }: SearchFormProps) {
   const [rotas, setRotas] = useState<Rota[]>([])
   const [loadingRotas, setLoadingRotas] = useState(true)
   const [origin, setOrigin] = useState('')
@@ -43,7 +45,9 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (validate()) onSearch({ origin, destination, departureDate })
+    if (!validate()) return
+    const rota = rotas.find(r => r.origem === origin && r.destino === destination)
+    onSearch({ origin, destination, departureDate, duracaoEstimadaMinutos: rota?.duracaoEstimadaMinutos ?? 0 })
   }
 
   const inputClass =
@@ -60,7 +64,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
       >
         <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Origem */}
-          <div>
+          <div className="relative">
             <label htmlFor="origin" className={labelClass}>Origem</label>
             <select
               id="origin"
@@ -75,12 +79,12 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
               ))}
             </select>
             {errors.origin && (
-              <p className="mt-1 text-xs text-red-500">{errors.origin}</p>
+              <p className="absolute left-0 top-full mt-0.5 text-xs text-red-500">{errors.origin}</p>
             )}
           </div>
 
           {/* Destino */}
-          <div>
+          <div className="relative">
             <label htmlFor="destination" className={labelClass}>Destino</label>
             <select
               id="destination"
@@ -95,12 +99,12 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
               ))}
             </select>
             {errors.destination && (
-              <p className="mt-1 text-xs text-red-500">{errors.destination}</p>
+              <p className="absolute left-0 top-full mt-0.5 text-xs text-red-500">{errors.destination}</p>
             )}
           </div>
 
           {/* Data de ida */}
-          <div>
+          <div className="relative">
             <label htmlFor="departureDate" className={labelClass}>Data de ida</label>
             <input
               id="departureDate"
@@ -110,7 +114,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
               className={inputClass}
             />
             {errors.departureDate && (
-              <p className="mt-1 text-xs text-red-500">{errors.departureDate}</p>
+              <p className="absolute left-0 top-full mt-0.5 text-xs text-red-500">{errors.departureDate}</p>
             )}
           </div>
 
@@ -118,13 +122,21 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
           <div>
             <button
               type="submit"
+              disabled={isLoading}
               aria-label="Buscar passagens de ônibus"
-              className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-[0_4px_8px_rgba(7,87,168,0.24)] transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-[0_4px_8px_rgba(7,87,168,0.24)] transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                <path fillRule="evenodd" d="M9 3a6 6 0 1 0 3.768 10.674l3.279 3.279a1 1 0 0 0 1.414-1.414l-3.279-3.279A6 6 0 0 0 9 3Zm-4 6a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clipRule="evenodd"/>
-              </svg>
-              Buscar
+              {isLoading ? (
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                  <path fillRule="evenodd" d="M9 3a6 6 0 1 0 3.768 10.674l3.279 3.279a1 1 0 0 0 1.414-1.414l-3.279-3.279A6 6 0 0 0 9 3Zm-4 6a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clipRule="evenodd"/>
+                </svg>
+              )}
+              {isLoading ? 'Buscando...' : 'Buscar'}
             </button>
           </div>
         </div>
