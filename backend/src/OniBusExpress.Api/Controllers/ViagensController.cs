@@ -63,16 +63,18 @@ public class ViagensController : ControllerBase
         return Ok(viagens);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id}")]
     [ProducesResponseType(typeof(ViagemDetalheResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ObterPorId(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> ObterPorId(string id, CancellationToken cancellationToken)
     {
+        var viagemId = id.Trim().ToUpperInvariant();
+
         var viagem = await _dbContext.Viagens
             .AsNoTracking()
             .Include(v => v.Rota)
             .Include(v => v.Reservas)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == viagemId, cancellationToken);
 
         if (viagem is null)
         {

@@ -1,7 +1,7 @@
 namespace OniBusExpress.Api.DTOs;
 
 public record ViagemResumoResponse(
-    Guid Id,
+    string Id,
     string Origem,
     string Destino,
     DateTime DataHoraPartidaUtc,

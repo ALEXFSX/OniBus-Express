@@ -46,7 +46,7 @@ namespace OniBusExpress.Api.Migrations
                 name: "viagens",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
                     RotaId = table.Column<Guid>(type: "uuid", nullable: false),
                     DataHoraPartidaUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     PrecoBase = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
@@ -68,7 +68,7 @@ namespace OniBusExpress.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ViagemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ViagemId = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
                     PassageiroId = table.Column<Guid>(type: "uuid", nullable: false),
                     NumeroAssento = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),

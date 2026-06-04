@@ -29,6 +29,7 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("viagens");
             entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).HasMaxLength(12).ValueGeneratedNever();
             entity.Property(x => x.DataHoraPartidaUtc).IsRequired();
             entity.Property(x => x.PrecoBase).HasColumnType("numeric(10,2)").IsRequired();
             entity.Property(x => x.TotalAssentos).IsRequired();
@@ -55,6 +56,7 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("reservas");
             entity.HasKey(x => x.Id);
+            entity.Property(x => x.ViagemId).HasMaxLength(12).IsRequired();
             entity.Property(x => x.NumeroAssento).IsRequired();
             entity.Property(x => x.Status).IsRequired();
             entity.Property(x => x.CodigoReserva).HasMaxLength(16).IsRequired();

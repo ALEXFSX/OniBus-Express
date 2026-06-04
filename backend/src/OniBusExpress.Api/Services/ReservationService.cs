@@ -32,9 +32,11 @@ public class ReservationService : IReservationService
             throw new BusinessRuleException("CPF invalido.");
         }
 
+        var viagemId = request.ViagemId.Trim().ToUpperInvariant();
+
         var viagem = await _dbContext.Viagens
             .Include(v => v.Rota)
-            .FirstOrDefaultAsync(v => v.Id == request.ViagemId, cancellationToken);
+            .FirstOrDefaultAsync(v => v.Id == viagemId, cancellationToken);
 
         if (viagem is null)
         {
@@ -53,7 +55,7 @@ public class ReservationService : IReservationService
 
         var assentoOcupado = await _dbContext.Reservas
             .AnyAsync(r =>
-                r.ViagemId == request.ViagemId &&
+                r.ViagemId == viagemId &&
                 r.NumeroAssento == request.NumeroAssento &&
                 r.Status == StatusReserva.Confirmada,
                 cancellationToken);

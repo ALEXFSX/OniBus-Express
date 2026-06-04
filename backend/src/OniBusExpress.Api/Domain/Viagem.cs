@@ -2,7 +2,7 @@ namespace OniBusExpress.Api.Domain;
 
 public class Viagem
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public Guid RotaId { get; set; }
     public Rota? Rota { get; set; }
     public DateTime DataHoraPartidaUtc { get; set; }

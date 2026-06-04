@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using OniBusExpress.Api.Common;
 using OniBusExpress.Api.Domain;
 
 namespace OniBusExpress.Api.Data;
@@ -32,28 +33,32 @@ public static class DbInitializer
 
         dbContext.Rotas.AddRange(rota1, rota2);
 
+        var partidaSaoPauloRioPrimeira = DateTime.UtcNow.Date.AddDays(2).AddHours(12);
+        var partidaSaoPauloRioSegunda = DateTime.UtcNow.Date.AddDays(3).AddHours(8);
+        var partidaCampinasBeloHorizonte = DateTime.UtcNow.Date.AddDays(4).AddHours(10);
+
         dbContext.Viagens.AddRange(
             new Viagem
             {
-                Id = Guid.NewGuid(),
+                Id = ViagemIdGenerator.Generate(rota1.Origem, rota1.Destino, partidaSaoPauloRioPrimeira),
                 RotaId = rota1.Id,
-                DataHoraPartidaUtc = DateTime.UtcNow.Date.AddDays(2).AddHours(12),
+                DataHoraPartidaUtc = partidaSaoPauloRioPrimeira,
                 PrecoBase = 129.90m,
                 TotalAssentos = 44
             },
             new Viagem
             {
-                Id = Guid.NewGuid(),
+                Id = ViagemIdGenerator.Generate(rota1.Origem, rota1.Destino, partidaSaoPauloRioSegunda),
                 RotaId = rota1.Id,
-                DataHoraPartidaUtc = DateTime.UtcNow.Date.AddDays(3).AddHours(8),
+                DataHoraPartidaUtc = partidaSaoPauloRioSegunda,
                 PrecoBase = 99.90m,
                 TotalAssentos = 44
             },
             new Viagem
             {
-                Id = Guid.NewGuid(),
+                Id = ViagemIdGenerator.Generate(rota2.Origem, rota2.Destino, partidaCampinasBeloHorizonte),
                 RotaId = rota2.Id,
-                DataHoraPartidaUtc = DateTime.UtcNow.Date.AddDays(4).AddHours(10),
+                DataHoraPartidaUtc = partidaCampinasBeloHorizonte,
                 PrecoBase = 149.90m,
                 TotalAssentos = 46
             });

@@ -21,7 +21,8 @@ public class CriarReservaRequest
     public DateTime DataNascimento { get; set; }
 
     [Required]
-    public Guid ViagemId { get; set; }
+    [StringLength(12, MinimumLength = 12)]
+    public string ViagemId { get; set; } = string.Empty;
 
     [Range(1, 200)]
     public int NumeroAssento { get; set; }

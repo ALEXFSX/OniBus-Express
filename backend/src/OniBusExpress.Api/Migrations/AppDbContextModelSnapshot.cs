@@ -79,8 +79,10 @@ namespace OniBusExpress.Api.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("ViagemId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ViagemId")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
 
                     b.HasKey("Id");
 
@@ -120,9 +122,10 @@ namespace OniBusExpress.Api.Migrations
 
             modelBuilder.Entity("OniBusExpress.Api.Domain.Viagem", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("Id")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
 
                     b.Property<DateTime>("DataHoraPartidaUtc")
                         .HasColumnType("timestamp with time zone");

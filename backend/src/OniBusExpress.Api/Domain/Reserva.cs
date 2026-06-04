@@ -3,7 +3,7 @@ namespace OniBusExpress.Api.Domain;
 public class Reserva
 {
     public Guid Id { get; set; }
-    public Guid ViagemId { get; set; }
+    public string ViagemId { get; set; } = string.Empty;
     public Viagem? Viagem { get; set; }
     public Guid PassageiroId { get; set; }
     public Passageiro? Passageiro { get; set; }

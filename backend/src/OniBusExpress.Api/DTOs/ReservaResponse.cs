@@ -18,7 +18,7 @@ public record PassageiroResponse(
 );
 
 public record ViagemReservaResponse(
-    Guid Id,
+    string Id,
     string Origem,
     string Destino,
     DateTime DataHoraPartidaUtc,

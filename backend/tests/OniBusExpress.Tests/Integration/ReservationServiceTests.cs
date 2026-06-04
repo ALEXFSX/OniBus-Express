@@ -175,7 +175,7 @@ public class ReservationServiceTests
         }
     }
 
-    private static async Task<Guid> SeedViagemAsync(OniBusExpress.Api.Data.AppDbContext db, DateTime dataPartidaUtc)
+    private static async Task<string> SeedViagemAsync(OniBusExpress.Api.Data.AppDbContext db, DateTime dataPartidaUtc)
     {
         var rota = new Rota
         {
@@ -187,7 +187,7 @@ public class ReservationServiceTests
 
         var viagem = new Viagem
         {
-            Id = Guid.NewGuid(),
+            Id = ViagemIdGenerator.Generate(rota.Origem, rota.Destino, dataPartidaUtc),
             RotaId = rota.Id,
             DataHoraPartidaUtc = dataPartidaUtc,
             PrecoBase = 119.90m,
