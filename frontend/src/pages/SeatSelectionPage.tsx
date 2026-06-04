@@ -1,8 +1,12 @@
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 
-export default function SeatSelectionPage() {
- 
+interface SeatSelectionPageProps {
+  tripId: string;
+  onBackToSearch: () => void;
+}
+
+export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelectionPageProps) {
   return (
     <div className="flex min-h-screen flex-col bg-page">
       <Header />
@@ -11,7 +15,7 @@ export default function SeatSelectionPage() {
         <section className="mx-auto w-full max-w-245 px-6 py-10">
           <button
             type="button"
-          
+            onClick={onBackToSearch}
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-transparent px-0 py-0 text-sm font-medium text-text-muted transition hover:text-text-main"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -20,7 +24,9 @@ export default function SeatSelectionPage() {
             Voltar à busca
           </button>
 
-      
+          <p className="text-sm font-semibold text-text-muted">
+            Selecionando assento para a viagem #{tripId}
+          </p>
         </section>
       </main>
 

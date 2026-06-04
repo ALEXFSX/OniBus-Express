@@ -18,20 +18,27 @@ interface SearchState {
   duracaoEstimadaMinutos: number
 }
 
-interface NavigationState {
-  tripId?: string
+function getSeatSelectionTripId(pathname: string) {
+  const match = pathname.match(/^\/viagem\/([^/]+)\/assento$/)
+
+  return match?.[1] ?? null
+}
+
+function getTripShortcutCode(pathname: string) {
+  const match = pathname.match(/^\/([a-zA-Z]{4}\d{8})$/)
+
+  return match?.[1]?.toUpperCase() ?? null
 }
 
 function App() {
   const [searchResult, setSearchResult] = useState<SearchState | null>(null)
   const [loading, setLoading] = useState(false)
   const [pathname, setPathname] = useState(() => window.location.pathname)
-  const [navigationState, setNavigationState] = useState<NavigationState | null>(() => window.history.state)
+  const [isSeatSelectionRouteReady, setIsSeatSelectionRouteReady] = useState(false)
 
   useEffect(() => {
     const syncLocation = () => {
       setPathname(window.location.pathname)
-      setNavigationState(window.history.state)
     }
 
     window.addEventListener('popstate', syncLocation)
@@ -41,25 +48,68 @@ function App() {
     }
   }, [])
 
-  function navigate(path: string, state: NavigationState = {}) {
-    window.history.pushState(state, '', path)
+  function navigate(path: string, options: { replace?: boolean } = {}) {
+    if (options.replace) {
+      window.history.replaceState({}, '', path)
+    } else {
+      window.history.pushState({}, '', path)
+    }
+
     setPathname(window.location.pathname)
-    setNavigationState(window.history.state)
+    setIsSeatSelectionRouteReady(false)
   }
 
-  const seatSelectionTripId = pathname === '/reserva/assento' ? navigationState?.tripId ?? null : null
+  const tripShortcutCode = getTripShortcutCode(pathname)
+  const seatSelectionTripId = getSeatSelectionTripId(pathname)
 
   useEffect(() => {
-    if (pathname === '/reserva/assento' && !seatSelectionTripId) {
-      navigate('/')
+    if (!tripShortcutCode) {
+      return
+    }
+
+    navigate(`/viagem/${tripShortcutCode}/assento`, { replace: true })
+  }, [tripShortcutCode])
+
+  useEffect(() => {
+    let isActive = true
+
+    async function validateSeatSelectionRoute() {
+      if (!seatSelectionTripId) {
+        setIsSeatSelectionRouteReady(false)
+        return
+      }
+
+      setIsSeatSelectionRouteReady(false)
+
+      try {
+        const viagem = await viagensService.buscarPorId(seatSelectionTripId)
+        const departureDate = new Date(viagem.dataHoraPartidaUtc)
+
+        if (departureDate < new Date()) {
+          navigate('/')
+          return
+        }
+
+        if (isActive) {
+          setIsSeatSelectionRouteReady(true)
+        }
+      } catch {
+        navigate('/')
+      }
+    }
+
+    validateSeatSelectionRoute()
+
+    return () => {
+      isActive = false
     }
   }, [pathname, seatSelectionTripId])
 
-  if (seatSelectionTripId) {
+  if (seatSelectionTripId && isSeatSelectionRouteReady) {
     return <SeatSelectionPage tripId={seatSelectionTripId} onBackToSearch={() => navigate('/')} />
   }
 
-  if (pathname === '/reserva/assento') {
+  if (pathname.startsWith('/viagem/') && pathname.endsWith('/assento')) {
     return null
   }
 
@@ -93,7 +143,7 @@ function App() {
             origem={searchResult.origem}
             destino={searchResult.destino}
             duracaoEstimadaMinutos={searchResult.duracaoEstimadaMinutos}
-            onSelectTrip={viagem => navigate('/reserva/assento', { tripId: viagem.id })}
+            onSelectTrip={viagem => navigate(`/viagem/${viagem.id}/assento`)}
           />
         ) : (
           <Benefits />
