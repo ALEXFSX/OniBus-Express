@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './index.css'
 import Header from './components/Header'
 import Hero from './components/Hero'
@@ -9,6 +9,7 @@ import TripCardSkeleton from './components/TripCardSkeleton'
 import Footer from './components/Footer'
 import { viagensService } from './services/api'
 import type { Viagem } from './types/viagem'
+import SeatSelectionPage from './pages/SeatSelectionPage'
 
 interface SearchState {
   viagens: Viagem[]
@@ -17,9 +18,50 @@ interface SearchState {
   duracaoEstimadaMinutos: number
 }
 
+interface NavigationState {
+  tripId?: string
+}
+
 function App() {
   const [searchResult, setSearchResult] = useState<SearchState | null>(null)
   const [loading, setLoading] = useState(false)
+  const [pathname, setPathname] = useState(() => window.location.pathname)
+  const [navigationState, setNavigationState] = useState<NavigationState | null>(() => window.history.state)
+
+  useEffect(() => {
+    const syncLocation = () => {
+      setPathname(window.location.pathname)
+      setNavigationState(window.history.state)
+    }
+
+    window.addEventListener('popstate', syncLocation)
+
+    return () => {
+      window.removeEventListener('popstate', syncLocation)
+    }
+  }, [])
+
+  function navigate(path: string, state: NavigationState = {}) {
+    window.history.pushState(state, '', path)
+    setPathname(window.location.pathname)
+    setNavigationState(window.history.state)
+  }
+
+  const seatSelectionTripId = pathname === '/reserva/assento' ? navigationState?.tripId ?? null : null
+
+  useEffect(() => {
+    if (pathname === '/reserva/assento' && !seatSelectionTripId) {
+      navigate('/')
+    }
+  }, [pathname, seatSelectionTripId])
+
+  if (seatSelectionTripId) {
+    return <SeatSelectionPage tripId={seatSelectionTripId} onBackToSearch={() => navigate('/')} />
+  }
+
+  if (pathname === '/reserva/assento') {
+    return null
+  }
 
   async function handleSearch(fields: { origin: string; destination: string; departureDate: string; duracaoEstimadaMinutos: number }) {
     setLoading(true)
@@ -34,7 +76,7 @@ function App() {
   return (
     <div className="flex min-h-screen flex-col bg-page">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 bg-linear-to-r from-blue-100 to-slate-50">
         <Hero />
         <SearchForm onSearch={handleSearch} isLoading={loading} />
         {loading ? (
@@ -51,7 +93,7 @@ function App() {
             origem={searchResult.origem}
             destino={searchResult.destino}
             duracaoEstimadaMinutos={searchResult.duracaoEstimadaMinutos}
-            onSelectTrip={viagem => console.log('Selecionada:', viagem)}
+            onSelectTrip={viagem => navigate('/reserva/assento', { tripId: viagem.id })}
           />
         ) : (
           <Benefits />

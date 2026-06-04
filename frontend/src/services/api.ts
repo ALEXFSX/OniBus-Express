@@ -1,5 +1,6 @@
 import type { Rota } from '../types/rota'
 import type { Viagem } from '../types/viagem'
+import type { ViagemDetalhe } from '../types/viagemDetalhe'
 
 // Em produção, defina VITE_API_URL com a URL completa do backend.
 // Em desenvolvimento o proxy do Vite encaminha /api → localhost:8080.
@@ -27,4 +28,5 @@ export const viagensService = {
     const params = new URLSearchParams({ origem, destino })
     return get<Viagem[]>(`/viagens?${params.toString()}`)
   },
+  buscarPorId: (id: string) => get<ViagemDetalhe>(`/viagens/${id}`),
 }

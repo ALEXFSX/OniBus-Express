@@ -1,6 +1,6 @@
 export default function Header() {
   return (
-    <header className="w-full rounded-b-xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-50 w-full rounded-b-xl border border-slate-200/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-lg sm:px-6">
    <div className="mx-auto flex max-w-7xl items-center justify-between ">
 
       <div className="flex items-center gap-3">
