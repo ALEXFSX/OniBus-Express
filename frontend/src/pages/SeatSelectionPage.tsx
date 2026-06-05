@@ -9,6 +9,7 @@ import type { ViagemDetalhe } from "../types/viagemDetalhe";
 interface SeatSelectionPageProps {
   tripId: string;
   onBackToSearch: () => void;
+  onContinueToCheckout: (seatNumber: number) => void;
 }
 
 function formatCurrency(value: number) {
@@ -45,7 +46,7 @@ function formatTripTime(utcIsoDate: string) {
   });
 }
 
-export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelectionPageProps) {
+export default function SeatSelectionPage({ tripId, onBackToSearch, onContinueToCheckout }: SeatSelectionPageProps) {
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
   const [tripDetail, setTripDetail] = useState<ViagemDetalhe | null>(null);
   const [durationInMinutes, setDurationInMinutes] = useState<number | null>(null);
@@ -123,8 +124,7 @@ export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelect
 
   const handleContinue = () => {
     if (selectedSeat !== null) {
-      console.log(`Prosseguindo com assento: ${selectedSeat}`);
-      // TODO: Navegar para próxima etapa com selectedTrip e selectedSeat
+      onContinueToCheckout(selectedSeat);
     }
   };
 

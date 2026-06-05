@@ -25,6 +25,10 @@ interface RequestOptions {
   signal?: AbortSignal
 }
 
+interface ApiErrorBody {
+  erro?: string
+}
+
 function buildPath(path: string, query?: RequestOptions['query']) {
   if (!query) return path
 
@@ -49,10 +53,30 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   })
 
   if (!response.ok) {
-    throw new ApiError(fullPath, response.status, `Erro ao buscar ${fullPath}: ${response.status} ${response.statusText}`)
+    let message = `Erro ao buscar ${fullPath}: ${response.status} ${response.statusText}`
+
+    try {
+      const payload = (await response.json()) as ApiErrorBody
+      if (payload?.erro) {
+        message = payload.erro
+      }
+    } catch {
+      // Sem payload JSON de erro, mantem mensagem padrao.
+    }
+
+    throw new ApiError(fullPath, response.status, message)
   }
 
-  return response.json() as Promise<T>
+  if (response.status === 204) {
+    return undefined as T
+  }
+
+  const contentType = response.headers.get('content-type')
+  if (contentType?.includes('application/json')) {
+    return response.json() as Promise<T>
+  }
+
+  return response.text() as T
 }
 
 export const rotasService = {
@@ -65,6 +89,40 @@ interface BuscarViagensParams {
   data?: string
 }
 
+interface CriarReservaPayload {
+  nome: string
+  cpf: string
+  email: string
+  dataNascimento: string
+  viagemId: string
+  numeroAssento: number
+}
+
+interface ReservaPassageiro {
+  nome: string
+  cpf: string
+  email: string
+  dataNascimento: string
+}
+
+interface ReservaViagem {
+  id: string
+  origem: string
+  destino: string
+  dataHoraPartidaUtc: string
+  precoBase: number
+}
+
+export interface ReservaResponse {
+  codigoReserva: string
+  status: string
+  numeroAssento: number
+  criadaEmUtc: string
+  canceladaEmUtc: string | null
+  passageiro: ReservaPassageiro
+  viagem: ReservaViagem
+}
+
 export const viagensService = {
   buscar: ({ origem, destino, data }: BuscarViagensParams, signal?: AbortSignal) =>
     request<Viagem[]>('/viagens', {
@@ -73,4 +131,15 @@ export const viagensService = {
     }),
   buscarPorId: (tripId: string, signal?: AbortSignal) =>
     request<ViagemDetalhe>(`/viagens/${tripId.trim().toUpperCase()}`, { signal }),
+}
+
+export const reservasService = {
+  criar: (payload: CriarReservaPayload, signal?: AbortSignal) =>
+    request<ReservaResponse>('/reservas', {
+      method: 'POST',
+      body: payload,
+      signal,
+    }),
+  buscarPorCodigo: (codigoReserva: string, signal?: AbortSignal) =>
+    request<ReservaResponse>(`/reservas/${codigoReserva.trim().toUpperCase()}`, { signal }),
 }

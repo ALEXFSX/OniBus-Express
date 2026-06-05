@@ -10,6 +10,8 @@ import Footer from './components/Footer'
 import { viagensService } from './services/api'
 import type { Viagem } from './types/viagem'
 import SeatSelectionPage from './pages/SeatSelectionPage'
+import CheckoutPage from './pages/CheckoutPage'
+import ReservationDetailsPage from './pages/ReservationDetailsPage'
 
 interface SearchState {
   viagens: Viagem[]
@@ -19,8 +21,19 @@ interface SearchState {
   duracaoEstimadaMinutos: number
 }
 
+interface CheckoutSelectionState {
+  tripId: string
+  seatNumber: number
+}
+
 function getSeatSelectionTripId(pathname: string) {
   const match = pathname.match(/^\/viagem\/([^/]+)\/assento$/)
+
+  return match?.[1] ?? null
+}
+
+function getCheckoutTripId(pathname: string) {
+  const match = pathname.match(/^\/viagem\/([^/]+)\/checkout$/)
 
   return match?.[1] ?? null
 }
@@ -31,8 +44,15 @@ function getTripShortcutCode(pathname: string) {
   return match?.[1]?.toUpperCase() ?? null
 }
 
+function getReservationCode(pathname: string) {
+  const match = pathname.match(/^\/reserva\/([^/]+)$/)
+
+  return match?.[1]?.toUpperCase() ?? null
+}
+
 function App() {
   const [searchResult, setSearchResult] = useState<SearchState | null>(null)
+  const [checkoutSelection, setCheckoutSelection] = useState<CheckoutSelectionState | null>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [pathname, setPathname] = useState(() => window.location.pathname)
@@ -61,6 +81,8 @@ function App() {
 
   const tripShortcutCode = getTripShortcutCode(pathname)
   const seatSelectionTripId = getSeatSelectionTripId(pathname)
+  const checkoutTripId = getCheckoutTripId(pathname)
+  const reservationCode = getReservationCode(pathname)
 
   useEffect(() => {
     if (!tripShortcutCode) {
@@ -70,8 +92,55 @@ function App() {
     navigate(`/viagem/${tripShortcutCode}/assento`, { replace: true })
   }, [tripShortcutCode])
 
+  useEffect(() => {
+    if (!checkoutTripId) {
+      return
+    }
+
+    if (!checkoutSelection || checkoutSelection.tripId !== checkoutTripId) {
+      navigate(`/viagem/${checkoutTripId}/assento`, { replace: true })
+    }
+  }, [checkoutSelection, checkoutTripId])
+
   if (seatSelectionTripId) {
-    return <SeatSelectionPage tripId={seatSelectionTripId} onBackToSearch={() => navigate('/')} />
+    return (
+      <SeatSelectionPage
+        tripId={seatSelectionTripId}
+        onBackToSearch={() => navigate('/')}
+        onContinueToCheckout={seatNumber => {
+          setCheckoutSelection({ tripId: seatSelectionTripId, seatNumber })
+          navigate(`/viagem/${seatSelectionTripId}/checkout`)
+        }}
+      />
+    )
+  }
+
+  if (checkoutTripId && checkoutSelection && checkoutSelection.tripId === checkoutTripId) {
+    return (
+      <CheckoutPage
+        tripId={checkoutSelection.tripId}
+        seatNumber={checkoutSelection.seatNumber}
+        onBackToSeatSelection={() => navigate(`/viagem/${checkoutSelection.tripId}/assento`)}
+        onBuyAnotherTicket={() => {
+          setCheckoutSelection(null)
+          navigate('/')
+        }}
+        onViewBooking={bookingCode => navigate(`/reserva/${bookingCode}`)}
+      />
+    )
+  }
+
+  if (reservationCode) {
+    return (
+      <ReservationDetailsPage
+        bookingCode={reservationCode}
+        onBackToSearch={() => navigate('/')}
+      />
+    )
+  }
+
+  if (checkoutTripId) {
+    return null
   }
 
   async function handleSearch(fields: { origin: string; destination: string; departureDate: string; duracaoEstimadaMinutos: number }) {
