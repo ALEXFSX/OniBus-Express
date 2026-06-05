@@ -319,7 +319,7 @@ export default function CheckoutPage({
           )}
 
           {!isLoading && !loadError && confirmationData && (
-            <div className="mx-auto w-full max-w-[670px] py-3 text-center">
+            <div className="mx-auto w-full max-w-167.5 py-3 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                 <svg
                   className="h-10 w-10"
