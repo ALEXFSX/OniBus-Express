@@ -18,7 +18,7 @@ export default function BookingSummaryCard({
   const isDisabled = selectedSeat === null;
 
   return (
-    <div className="sticky top-24 rounded-2xl border border-border bg-white p-6">
+    <div className="sticky top-24 h-fit rounded-2xl border border-border bg-white p-6">
       {/* Title */}
       <h3 className="mb-6 text-base font-black text-text-main">Resumo</h3>
 

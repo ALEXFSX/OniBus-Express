@@ -153,10 +153,6 @@ export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelect
             Voltar à busca
           </button>
 
-          <p className="mb-8 text-sm font-semibold text-text-muted">
-            Selecionando assento para a viagem #{tripId}
-          </p>
-
           {isLoading && (
             <div className="rounded-2xl border border-border bg-white p-6 text-sm text-text-muted">
               Carregando dados da viagem...
