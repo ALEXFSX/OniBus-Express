@@ -13,8 +13,7 @@ public record ReservaResponse(
 public record PassageiroResponse(
     string Nome,
     string Cpf,
-    string Email,
-    DateTime DataNascimento
+    string Email
 );
 
 public record ViagemReservaResponse(

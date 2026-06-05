@@ -4,14 +4,12 @@ export interface PassengerFormData {
   fullName: string;
   cpf: string;
   email: string;
-  birthDate: string;
 }
 
 export interface PassengerErrors {
   fullName?: string;
   cpf?: string;
   email?: string;
-  birthDate?: string;
 }
 
 interface PassengerDataCardProps {
@@ -113,23 +111,6 @@ export default function PassengerDataCard({
           <FieldError id="email-error" message={errors.email} />
         </div>
 
-        <div>
-          <label htmlFor="birthDate" className="mb-2 block text-base font-bold text-text-main">
-            Data de nascimento
-          </label>
-          <input
-            id="birthDate"
-            name="birthDate"
-            type="date"
-            value={passenger.birthDate}
-            onChange={event => onChange("birthDate", event.target.value)}
-            aria-label="Data de nascimento do passageiro"
-            aria-invalid={Boolean(errors.birthDate)}
-            aria-describedby={errors.birthDate ? "birthDate-error" : undefined}
-            className="h-12 w-full rounded-xl border border-border px-4 text-base text-text-main shadow-[0_2px_6px_rgba(7,20,38,0.08)] outline-none transition focus:border-primary focus:ring-3 focus:ring-blue-100"
-          />
-          <FieldError id="birthDate-error" message={errors.birthDate} />
-        </div>
       </form>
 
       <div className="mt-8 flex items-start gap-3 rounded-2xl bg-background-alt p-4 text-sm text-text-muted">

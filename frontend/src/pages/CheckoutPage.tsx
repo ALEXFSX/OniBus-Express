@@ -83,10 +83,6 @@ function validatePassengerData(passenger: PassengerFormData): PassengerErrors {
     errors.email = "Informe um e-mail valido.";
   }
 
-  if (!passenger.birthDate) {
-    errors.birthDate = "Informe a data de nascimento.";
-  }
-
   return errors;
 }
 
@@ -126,10 +122,6 @@ function formatCpfDisplay(value: string) {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
-function formatDateTimeForApi(dateValue: string) {
-  return new Date(`${dateValue}T00:00:00.000Z`).toISOString();
-}
-
 export default function CheckoutPage({
   tripId,
   seatNumber,
@@ -148,7 +140,6 @@ export default function CheckoutPage({
     fullName: "",
     cpf: "",
     email: "",
-    birthDate: "",
   });
   const [errors, setErrors] = useState<PassengerErrors>({});
 
@@ -232,7 +223,6 @@ export default function CheckoutPage({
         nome: passenger.fullName.trim(),
         cpf: passenger.cpf,
         email: passenger.email.trim(),
-        dataNascimento: formatDateTimeForApi(passenger.birthDate),
         viagemId: tripId,
         numeroAssento: seatNumber,
       });

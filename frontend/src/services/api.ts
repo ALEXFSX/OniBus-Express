@@ -93,7 +93,6 @@ interface CriarReservaPayload {
   nome: string
   cpf: string
   email: string
-  dataNascimento: string
   viagemId: string
   numeroAssento: number
 }
@@ -102,7 +101,6 @@ interface ReservaPassageiro {
   nome: string
   cpf: string
   email: string
-  dataNascimento: string
 }
 
 interface ReservaViagem {

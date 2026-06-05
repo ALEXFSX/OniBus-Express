@@ -32,7 +32,13 @@ public class ReservationService : IReservationService
             throw new BusinessRuleException("CPF invalido.");
         }
 
+        if (!request.NumeroAssento.HasValue)
+        {
+            throw new BusinessRuleException("Numero de assento e obrigatorio.");
+        }
+
         var viagemId = request.ViagemId.Trim().ToUpperInvariant();
+        var numeroAssento = request.NumeroAssento.Value;
 
         var viagem = await _dbContext.Viagens
             .Include(v => v.Rota)
@@ -48,7 +54,7 @@ public class ReservationService : IReservationService
             throw new BusinessRuleException("Nao e permitido reservar passagem para viagem ja realizada.");
         }
 
-        if (request.NumeroAssento < 1 || request.NumeroAssento > viagem.TotalAssentos)
+        if (numeroAssento < 1 || numeroAssento > viagem.TotalAssentos)
         {
             throw new BusinessRuleException("Numero de assento invalido para a viagem selecionada.");
         }
@@ -56,7 +62,7 @@ public class ReservationService : IReservationService
         var assentoOcupado = await _dbContext.Reservas
             .AnyAsync(r =>
                 r.ViagemId == viagemId &&
-                r.NumeroAssento == request.NumeroAssento &&
+                r.NumeroAssento == numeroAssento &&
                 r.Status == StatusReserva.Confirmada,
                 cancellationToken);
 
@@ -66,7 +72,6 @@ public class ReservationService : IReservationService
         }
 
         var cpfNormalizado = NormalizarCpf(request.Cpf);
-        var dataNascimentoUtc = NormalizarDataNascimento(request.DataNascimento);
 
         var passageiro = await _dbContext.Passageiros
             .FirstOrDefaultAsync(p => p.Cpf == cpfNormalizado, cancellationToken);
@@ -78,8 +83,7 @@ public class ReservationService : IReservationService
                 Id = Guid.NewGuid(),
                 Nome = request.Nome.Trim(),
                 Cpf = cpfNormalizado,
-                Email = request.Email.Trim(),
-                DataNascimento = dataNascimentoUtc
+                Email = request.Email.Trim()
             };
 
             _dbContext.Passageiros.Add(passageiro);
@@ -88,7 +92,6 @@ public class ReservationService : IReservationService
         {
             passageiro.Nome = request.Nome.Trim();
             passageiro.Email = request.Email.Trim();
-            passageiro.DataNascimento = dataNascimentoUtc;
         }
 
         var codigoReserva = await GerarCodigoReservaUnicoAsync(cancellationToken);
@@ -98,7 +101,7 @@ public class ReservationService : IReservationService
             Id = Guid.NewGuid(),
             ViagemId = viagem.Id,
             PassageiroId = passageiro.Id,
-            NumeroAssento = request.NumeroAssento,
+            NumeroAssento = numeroAssento,
             Status = StatusReserva.Confirmada,
             CodigoReserva = codigoReserva,
             CriadaEmUtc = _clock.UtcNow
@@ -188,18 +191,6 @@ public class ReservationService : IReservationService
         return new string(cpf.Where(char.IsDigit).ToArray());
     }
 
-    private static DateTime NormalizarDataNascimento(DateTime dataNascimento)
-    {
-        var data = dataNascimento.Date;
-
-        return data.Kind switch
-        {
-            DateTimeKind.Utc => data,
-            DateTimeKind.Local => data.ToUniversalTime(),
-            _ => DateTime.SpecifyKind(data, DateTimeKind.Utc)
-        };
-    }
-
     private static ReservaResponse ToResponse(Reserva reserva)
     {
         return new ReservaResponse(
@@ -211,8 +202,7 @@ public class ReservationService : IReservationService
             new PassageiroResponse(
                 reserva.Passageiro!.Nome,
                 reserva.Passageiro.Cpf,
-                reserva.Passageiro.Email,
-                reserva.Passageiro.DataNascimento),
+                reserva.Passageiro.Email),
             new ViagemReservaResponse(
                 reserva.Viagem!.Id,
                 reserva.Viagem.Rota!.Origem,

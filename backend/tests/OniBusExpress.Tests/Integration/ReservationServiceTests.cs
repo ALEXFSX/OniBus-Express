@@ -11,6 +11,78 @@ namespace OniBusExpress.Tests.Integration;
 public class ReservationServiceTests
 {
     [Fact]
+    public async Task DevePermitirCriarReservaComDadosMinimosDoPassageiro()
+    {
+        var (db, connection) = TestDbFactory.CreateSqliteInMemoryDb();
+        try
+        {
+            var now = new DateTime(2026, 6, 3, 12, 0, 0, DateTimeKind.Utc);
+            var viagemId = await SeedViagemAsync(db, now.AddDays(1));
+
+            var service = new ReservationService(
+                db,
+                new CpfValidator(),
+                new SequenceCodeGenerator(new[] { "SEM-00001" }),
+                new TestClock { UtcNow = now });
+
+            var request = new CriarReservaRequest
+            {
+                Nome = "Cliente Sem Nascimento",
+                Cpf = "11144477735",
+                Email = "cliente@teste.com",
+                ViagemId = viagemId,
+                NumeroAssento = 7
+            };
+
+            var reserva = await service.CriarAsync(request);
+
+            Assert.Equal("SEM-00001", reserva.CodigoReserva);
+
+            var passageiroDb = await db.Passageiros.SingleAsync(p => p.Cpf == "11144477735");
+            Assert.Equal("cliente@teste.com", passageiroDb.Email);
+        }
+        finally
+        {
+            await connection.DisposeAsync();
+            await db.DisposeAsync();
+        }
+    }
+
+    [Fact]
+    public async Task NaoDevePermitirCriarReservaSemNumeroAssento()
+    {
+        var (db, connection) = TestDbFactory.CreateSqliteInMemoryDb();
+        try
+        {
+            var now = new DateTime(2026, 6, 3, 12, 0, 0, DateTimeKind.Utc);
+            var viagemId = await SeedViagemAsync(db, now.AddDays(1));
+
+            var service = new ReservationService(
+                db,
+                new CpfValidator(),
+                new SequenceCodeGenerator(new[] { "REQ-00001" }),
+                new TestClock { UtcNow = now });
+
+            var request = new CriarReservaRequest
+            {
+                Nome = "Cliente Sem Assento",
+                Cpf = "11144477735",
+                Email = "cliente@teste.com",
+                ViagemId = viagemId,
+                NumeroAssento = null
+            };
+
+            var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => service.CriarAsync(request));
+            Assert.Contains("obrigatorio", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            await connection.DisposeAsync();
+            await db.DisposeAsync();
+        }
+    }
+
+    [Fact]
     public async Task NaoDevePermitirReservarAssentoJaOcupado()
     {
         var (db, connection) = TestDbFactory.CreateSqliteInMemoryDb();
@@ -24,8 +96,7 @@ public class ReservationServiceTests
                 Id = Guid.NewGuid(),
                 Nome = "Fulano",
                 Cpf = "52998224725",
-                Email = "fulano@teste.com",
-                DataNascimento = new DateTime(1990, 1, 1)
+                Email = "fulano@teste.com"
             };
             db.Passageiros.Add(passenger);
 
@@ -52,7 +123,6 @@ public class ReservationServiceTests
                 Nome = "Novo Cliente",
                 Cpf = "11144477735",
                 Email = "novo@teste.com",
-                DataNascimento = new DateTime(1995, 5, 10),
                 ViagemId = viagemId,
                 NumeroAssento = 10
             };
@@ -82,8 +152,7 @@ public class ReservationServiceTests
                 Id = Guid.NewGuid(),
                 Nome = "Fulano",
                 Cpf = "52998224725",
-                Email = "fulano@teste.com",
-                DataNascimento = new DateTime(1990, 1, 1)
+                Email = "fulano@teste.com"
             };
             db.Passageiros.Add(passenger);
 
@@ -129,8 +198,7 @@ public class ReservationServiceTests
                 Id = Guid.NewGuid(),
                 Nome = "Cliente 1",
                 Cpf = "52998224725",
-                Email = "c1@teste.com",
-                DataNascimento = new DateTime(1991, 1, 1)
+                Email = "c1@teste.com"
             };
             db.Passageiros.Add(existingPassenger);
 
@@ -157,7 +225,6 @@ public class ReservationServiceTests
                 Nome = "Cliente 2",
                 Cpf = "11144477735",
                 Email = "c2@teste.com",
-                DataNascimento = new DateTime(1994, 4, 4),
                 ViagemId = viagemId,
                 NumeroAssento = 2
             };

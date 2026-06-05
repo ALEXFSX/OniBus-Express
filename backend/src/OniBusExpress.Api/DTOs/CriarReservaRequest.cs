@@ -18,12 +18,10 @@ public class CriarReservaRequest
     public string Email { get; set; } = string.Empty;
 
     [Required]
-    public DateTime DataNascimento { get; set; }
-
-    [Required]
     [StringLength(12, MinimumLength = 12)]
     public string ViagemId { get; set; } = string.Empty;
 
+    [Required]
     [Range(1, 200)]
-    public int NumeroAssento { get; set; }
+    public int? NumeroAssento { get; set; }
 }
