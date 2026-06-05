@@ -50,6 +50,10 @@ function getReservationCode(pathname: string) {
   return match?.[1]?.toUpperCase() ?? null
 }
 
+function isBookingLookupPath(pathname: string) {
+  return pathname === '/minha-reserva'
+}
+
 function App() {
   const [searchResult, setSearchResult] = useState<SearchState | null>(null)
   const [checkoutSelection, setCheckoutSelection] = useState<CheckoutSelectionState | null>(null)
@@ -83,6 +87,7 @@ function App() {
   const seatSelectionTripId = getSeatSelectionTripId(pathname)
   const checkoutTripId = getCheckoutTripId(pathname)
   const reservationCode = getReservationCode(pathname)
+  const bookingLookupPath = isBookingLookupPath(pathname)
 
   useEffect(() => {
     if (!tripShortcutCode) {
@@ -133,7 +138,15 @@ function App() {
   if (reservationCode) {
     return (
       <ReservationDetailsPage
-        bookingCode={reservationCode}
+        initialBookingCode={reservationCode}
+        onBackToSearch={() => navigate('/')}
+      />
+    )
+  }
+
+  if (bookingLookupPath) {
+    return (
+      <ReservationDetailsPage
         onBackToSearch={() => navigate('/')}
       />
     )

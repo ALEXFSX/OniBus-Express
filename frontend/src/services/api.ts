@@ -142,4 +142,9 @@ export const reservasService = {
     }),
   buscarPorCodigo: (codigoReserva: string, signal?: AbortSignal) =>
     request<ReservaResponse>(`/reservas/${codigoReserva.trim().toUpperCase()}`, { signal }),
+  cancelar: (codigoReserva: string, signal?: AbortSignal) =>
+    request<void>(`/reservas/${codigoReserva.trim().toUpperCase()}`, {
+      method: 'DELETE',
+      signal,
+    }),
 }

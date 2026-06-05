@@ -19,8 +19,8 @@ export default function Header() {
       </div>
 
       <nav aria-label="Navegação principal" className="flex items-center gap-8 text-sm font-medium text-slate-800">
-        <a href="#" className="transition hover:text-blue-600">Buscar</a>
-        <a href="#" className="transition hover:text-blue-600">Minha reserva</a>
+        <a href="/" className="transition hover:text-blue-600">Buscar</a>
+        <a href="/minha-reserva" className="transition hover:text-blue-600">Minha reserva</a>
       </nav>
               </div>
     </header>
