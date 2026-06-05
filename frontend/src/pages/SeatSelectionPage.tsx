@@ -54,6 +54,7 @@ export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelect
 
   useEffect(() => {
     let isActive = true;
+    const abortController = new AbortController();
 
     async function loadTripData() {
       setIsLoading(true);
@@ -62,8 +63,8 @@ export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelect
 
       try {
         const [detail, routes] = await Promise.all([
-          viagensService.buscarPorId(tripId),
-          rotasService.listar(),
+          viagensService.buscarPorId(tripId, abortController.signal),
+          rotasService.listar(abortController.signal),
         ]);
 
         if (!isActive) {
@@ -78,6 +79,10 @@ export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelect
 
         setTripDetail(detail);
         setDurationInMinutes(matchedRoute?.duracaoEstimadaMinutos ?? null);
+
+        if (new Date(detail.dataHoraPartidaUtc) < new Date()) {
+          setErrorMessage("Esta viagem nao esta mais disponivel para reserva.");
+        }
       } catch {
         if (!isActive) {
           return;
@@ -95,6 +100,7 @@ export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelect
 
     return () => {
       isActive = false;
+      abortController.abort();
     };
   }, [tripId]);
 
@@ -146,6 +152,10 @@ export default function SeatSelectionPage({ tripId, onBackToSearch }: SeatSelect
             </svg>
             Voltar à busca
           </button>
+
+          <p className="mb-8 text-sm font-semibold text-text-muted">
+            Selecionando assento para a viagem #{tripId}
+          </p>
 
           {isLoading && (
             <div className="rounded-2xl border border-border bg-white p-6 text-sm text-text-muted">

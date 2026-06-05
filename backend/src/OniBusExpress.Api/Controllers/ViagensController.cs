@@ -45,8 +45,8 @@ public class ViagensController : ControllerBase
 
         if (data.HasValue)
         {
-            var dataConsulta = data.Value.Date;
-            query = query.Where(v => v.DataHoraPartidaUtc.Date == dataConsulta);
+            var dataConsultaInicioUtc = DateTime.SpecifyKind(data.Value.Date, DateTimeKind.Utc);
+            query = query.Where(v => v.DataHoraPartidaUtc >= dataConsultaInicioUtc);
         }
 
         var viagens = await query

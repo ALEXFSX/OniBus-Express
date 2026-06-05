@@ -17,16 +17,34 @@ interface SearchFormProps {
 export default function SearchForm({ onSearch, isLoading = false }: SearchFormProps) {
   const [rotas, setRotas] = useState<Rota[]>([])
   const [loadingRotas, setLoadingRotas] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
   const [departureDate, setDepartureDate] = useState('')
   const [errors, setErrors] = useState<Partial<SearchFields>>({})
 
   useEffect(() => {
+    const abortController = new AbortController()
+    setLoadError(null)
+
     rotasService
-      .listar()
-      .then(setRotas)
+      .listar(abortController.signal)
+      .then(data => {
+        setRotas(data)
+        setLoadError(null)
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return
+        }
+
+        setLoadError('Nao foi possivel carregar origens e destinos.')
+      })
       .finally(() => setLoadingRotas(false))
+
+    return () => {
+      abortController.abort()
+    }
   }, [])
 
   const origins = [...new Set(rotas.map(r => r.origem))].sort()
@@ -70,7 +88,7 @@ export default function SearchForm({ onSearch, isLoading = false }: SearchFormPr
               id="origin"
               value={origin}
               onChange={e => setOrigin(e.target.value)}
-              disabled={loadingRotas}
+              disabled={loadingRotas || !!loadError}
               className={inputClass}
             >
               <option value="">{loadingRotas ? 'Carregando...' : 'Selecione'}</option>
@@ -90,7 +108,7 @@ export default function SearchForm({ onSearch, isLoading = false }: SearchFormPr
               id="destination"
               value={destination}
               onChange={e => setDestination(e.target.value)}
-              disabled={loadingRotas}
+              disabled={loadingRotas || !!loadError}
               className={inputClass}
             >
               <option value="">{loadingRotas ? 'Carregando...' : 'Selecione'}</option>
@@ -122,7 +140,7 @@ export default function SearchForm({ onSearch, isLoading = false }: SearchFormPr
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || loadingRotas || !!loadError}
               aria-label="Buscar passagens de ônibus"
               className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-[0_4px_8px_rgba(7,87,168,0.24)] transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-70"
             >
@@ -140,6 +158,7 @@ export default function SearchForm({ onSearch, isLoading = false }: SearchFormPr
             </button>
           </div>
         </div>
+        {loadError && <p className="mt-3 text-sm text-text-main">{loadError}</p>}
       </form>
     </div>
   )

@@ -15,6 +15,7 @@ interface SearchState {
   viagens: Viagem[]
   origem: string
   destino: string
+  departureDate: string
   duracaoEstimadaMinutos: number
 }
 
@@ -32,9 +33,9 @@ function getTripShortcutCode(pathname: string) {
 
 function App() {
   const [searchResult, setSearchResult] = useState<SearchState | null>(null)
+  const [searchError, setSearchError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [pathname, setPathname] = useState(() => window.location.pathname)
-  const [isSeatSelectionRouteReady, setIsSeatSelectionRouteReady] = useState(false)
 
   useEffect(() => {
     const syncLocation = () => {
@@ -56,7 +57,6 @@ function App() {
     }
 
     setPathname(window.location.pathname)
-    setIsSeatSelectionRouteReady(false)
   }
 
   const tripShortcutCode = getTripShortcutCode(pathname)
@@ -70,54 +70,29 @@ function App() {
     navigate(`/viagem/${tripShortcutCode}/assento`, { replace: true })
   }, [tripShortcutCode])
 
-  useEffect(() => {
-    let isActive = true
-
-    async function validateSeatSelectionRoute() {
-      if (!seatSelectionTripId) {
-        setIsSeatSelectionRouteReady(false)
-        return
-      }
-
-      setIsSeatSelectionRouteReady(false)
-
-      try {
-        const viagem = await viagensService.buscarPorId(seatSelectionTripId)
-        const departureDate = new Date(viagem.dataHoraPartidaUtc)
-
-        if (departureDate < new Date()) {
-          navigate('/')
-          return
-        }
-
-        if (isActive) {
-          setIsSeatSelectionRouteReady(true)
-        }
-      } catch {
-        navigate('/')
-      }
-    }
-
-    validateSeatSelectionRoute()
-
-    return () => {
-      isActive = false
-    }
-  }, [pathname, seatSelectionTripId])
-
-  if (seatSelectionTripId && isSeatSelectionRouteReady) {
+  if (seatSelectionTripId) {
     return <SeatSelectionPage tripId={seatSelectionTripId} onBackToSearch={() => navigate('/')} />
-  }
-
-  if (pathname.startsWith('/viagem/') && pathname.endsWith('/assento')) {
-    return null
   }
 
   async function handleSearch(fields: { origin: string; destination: string; departureDate: string; duracaoEstimadaMinutos: number }) {
     setLoading(true)
+    setSearchError(null)
     try {
-      const viagens = await viagensService.buscar({ origem: fields.origin, destino: fields.destination })
-      setSearchResult({ viagens, origem: fields.origin, destino: fields.destination, duracaoEstimadaMinutos: fields.duracaoEstimadaMinutos })
+      const viagens = await viagensService.buscar({
+        origem: fields.origin,
+        destino: fields.destination,
+        data: fields.departureDate,
+      })
+      setSearchResult({
+        viagens,
+        origem: fields.origin,
+        destino: fields.destination,
+        departureDate: fields.departureDate,
+        duracaoEstimadaMinutos: fields.duracaoEstimadaMinutos,
+      })
+    } catch {
+      setSearchResult(null)
+      setSearchError('Nao foi possivel buscar viagens agora. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -129,6 +104,13 @@ function App() {
       <main className="flex-1 bg-linear-to-r from-blue-100 to-slate-50">
         <Hero />
         <SearchForm onSearch={handleSearch} isLoading={loading} />
+        {searchError && (
+          <section className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6">
+            <div className="rounded-2xl border border-border bg-white/80 p-4 text-sm text-text-main">
+              {searchError}
+            </div>
+          </section>
+        )}
         {loading ? (
           <section className="mx-auto w-full max-w-7xl px-4 pt-10 pb-16 sm:px-6">
             <div className="flex flex-col gap-4">
@@ -142,8 +124,9 @@ function App() {
             viagens={searchResult.viagens}
             origem={searchResult.origem}
             destino={searchResult.destino}
+            selectedDate={searchResult.departureDate}
             duracaoEstimadaMinutos={searchResult.duracaoEstimadaMinutos}
-            onSelectTrip={viagem => navigate(`/viagem/${viagem.id}/assento`)}
+            onSelectTrip={tripId => navigate(`/viagem/${tripId}/assento`)}
           />
         ) : (
           <Benefits />

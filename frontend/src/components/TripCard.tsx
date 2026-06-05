@@ -2,8 +2,9 @@ import type { Viagem } from "../types/viagem";
 
 interface TripCardProps {
   viagem: Viagem;
+  selectedDate: string;
   duracaoEstimadaMinutos: number;
-  onSelect: (viagem: Viagem) => void;
+  onSelect: (tripId: string) => void;
 }
 
 function formatTime(date: Date) {
@@ -31,8 +32,16 @@ function formatPrice(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function toLocalDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function TripCard({
   viagem,
+  selectedDate,
   duracaoEstimadaMinutos,
   onSelect,
 }: TripCardProps) {
@@ -40,6 +49,7 @@ export default function TripCard({
   const arrival = new Date(
     departure.getTime() + duracaoEstimadaMinutos * 60_000,
   );
+  const isDifferentSelectedDate = toLocalDateKey(departure) !== selectedDate;
 
   return (
     <article
@@ -142,7 +152,7 @@ export default function TripCard({
           </p>
 
           <button
-            onClick={() => onSelect(viagem)}
+            onClick={() => onSelect(viagem.id)}
             className="mt-3 cursor-pointer rounded-lg bg-primary px-5 py-2.75 text-sm font-bold text-white transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 w-auto"
           >
             Selecionar
@@ -167,6 +177,11 @@ export default function TripCard({
             <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
           <span>{formatDate(departure)}</span>
+          {isDifferentSelectedDate && (
+            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[12px] font-semibold text-amber-700">
+              Data diferente da selecionada
+            </span>
+          )}
           <span
             className="hidden cursor-text select-all items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[12px] font-semibold text-slate-700 sm:inline-flex"
             aria-label={`Código da viagem ${viagem.id}`}
