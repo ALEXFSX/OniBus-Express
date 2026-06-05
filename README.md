@@ -1,36 +1,57 @@
 # OniBus Express
 
-Projeto de API para busca de rotas/viagens rodoviarias e reserva de passagens.
+Sistema para busca de rotas/viagens rodoviarias e reserva de passagens.
 
-## 1) Como rodar o projeto localmente
+## Passo a passo rapido (Docker)
 
-### Com Docker
+### 1. Pre-requisitos
+
+- Docker Desktop instalado e em execucao.
+- Porta 5173 livre (frontend), 8080 livre (API) e 5432 livre (PostgreSQL).
+
+### 2. Subir todo o projeto
 
 Na raiz do repositorio:
 
 ```bash
-docker-compose up --build
+docker-compose up -d --build
 ```
 
-Servicos:
+Importante:
+- Ao clonar o projeto, voce nao precisa rodar build manual do frontend nesse fluxo.
+- O comando acima ja faz o build da imagem do frontend automaticamente.
 
+### 3. Acessar aplicacao
+
+- Frontend (Nginx): http://localhost:5173
 - API: http://localhost:8080
 - Swagger: http://localhost:8080/swagger
 
-Para derrubar tudo:
+Observacao:
+- O frontend em Docker usa `/api` e o Nginx encaminha internamente para o servico `api`.
+
+### 4. Parar ambiente
+
+```bash
+docker-compose down
+```
+
+### 5. Resetar ambiente (apaga volume do banco)
 
 ```bash
 docker-compose down -v
 ```
 
-### Sem Docker
+## Execucao sem Docker (backend + frontend)
 
-Pre-requisitos:
+### 1. Pre-requisitos
 
 - .NET SDK 8+
-- PostgreSQL 16+ em execucao local
+- Node.js 20+
+- npm 10+
+- PostgreSQL 16+
 
-1. Crie o banco e usuario (se necessario):
+### 2. Configurar banco local
 
 ```sql
 CREATE DATABASE onibus_express;
@@ -38,7 +59,9 @@ CREATE USER postgres WITH PASSWORD 'postgres';
 GRANT ALL PRIVILEGES ON DATABASE onibus_express TO postgres;
 ```
 
-2. Garanta a connection string em backend/src/OniBusExpress.Api/appsettings.json:
+### 3. Ajustar connection string do backend
+
+Arquivo: `backend/src/OniBusExpress.Api/appsettings.json`
 
 ```json
 "ConnectionStrings": {
@@ -46,82 +69,59 @@ GRANT ALL PRIVILEGES ON DATABASE onibus_express TO postgres;
 }
 ```
 
-3. Suba a API pela raiz:
+### 4. Subir backend
 
 ```bash
 dotnet restore backend/OniBusExpress.sln
 dotnet run --project backend/src/OniBusExpress.Api
 ```
 
-4. Acesse:
-
+Backend disponivel em:
 - API: http://localhost:8080
 - Swagger: http://localhost:8080/swagger
 
-## 2) Tecnologias e bibliotecas usadas (e por que)
+### 5. Subir frontend
 
-- .NET 8 (ASP.NET Core Web API): base robusta para API REST, DI nativo e alta produtividade.
-- Entity Framework Core 8: mapeamento ORM e migrations para evolucao do schema.
-- Npgsql.EntityFrameworkCore.PostgreSQL: provider EF Core para PostgreSQL.
-- Swashbuckle.AspNetCore: geracao de documentacao Swagger/OpenAPI.
-- xUnit: framework de testes automatizados (unitarios e integracao).
-- Microsoft.NET.Test.Sdk e coverlet.collector: execucao de testes e coleta de cobertura.
-- Docker e Docker Compose: ambiente reproduzivel com API + banco.
+Em outro terminal:
 
-## 3) Decisoes de arquitetura relevantes
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-- Separacao por responsabilidades no backend:
-  - Controllers para camada HTTP.
-  - Services para regras de negocio.
-  - Data/AppDbContext para persistencia.
-  - Domain para entidades.
-  - DTOs para contratos de entrada/saida.
-- Regras de negocio centralizadas em ReservationService, mantendo controllers enxutos.
-- Excecoes de negocio via BusinessRuleException, convertidas em respostas HTTP adequadas.
-- Dependencias abstraidas por interfaces (IClock, ICpfValidator, IReservationCodeGenerator) para facilitar testes.
-- Migrations versionadas em codigo e inicializacao automatica de banco/seed no startup para simplificar ambiente de desenvolvimento.
+Importante:
+- Nesse fluxo de desenvolvimento local, nao precisa rodar `npm run build` para iniciar.
+- O build do frontend (`npm run build`) e recomendado para validar o bundle de producao.
 
-## 4) O que foi implementado
+Frontend em desenvolvimento:
+- http://localhost:5173
 
-- Endpoints de rotas, viagens e reservas.
-- Busca de viagens com filtros por origem, destino e data.
-- Consulta de detalhes da viagem com assentos ocupados e livres.
-- Criacao, consulta e cancelamento de reservas.
-- Validacoes de negocio:
-  - Bloqueio de assento ja ocupado.
-  - Bloqueio de reserva para viagem ja realizada.
-  - Validacao de CPF.
-  - Codigo de reserva no formato AAA-12345.
-  - Cancelamento permitido apenas ate 2 horas antes da partida.
-- Persistencia com PostgreSQL e EF Core.
-- Migrations e seed de dados.
-- Testes automatizados (unitarios e integracao).
+Observacao:
+- Em desenvolvimento, o Vite usa proxy de `/api` para o backend.
 
+## Testes
 
-## 5) Como rodar os testes
-
-Pela pasta backend:
+### Rodar todos os testes do backend
 
 ```bash
 cd backend
 dotnet test --nologo
 ```
 
-Pela raiz (solucao):
+### Rodar pela solucao
 
 ```bash
 dotnet test backend/OniBusExpress.sln --nologo
 ```
 
-Somente projeto de testes:
+### Rodar somente projeto de testes
 
 ```bash
 dotnet test backend/tests/OniBusExpress.Tests/OniBusExpress.Tests.csproj --nologo
 ```
 
-## 6) Endpoints e documentacao
-
-Endpoints principais:
+## Endpoints principais
 
 - GET /rotas
 - GET /viagens?origem={origem}&destino={destino}&data={yyyy-MM-dd}
@@ -129,3 +129,23 @@ Endpoints principais:
 - POST /reservas
 - GET /reservas/{codigo}
 - DELETE /reservas/{codigo}
+
+## Troubleshooting
+
+### Porta em uso
+
+- Se 5173, 8080 ou 5432 estiverem ocupadas, pare o processo que usa a porta ou ajuste mapeamentos no `docker-compose.yml`.
+
+### Erros por schema antigo de banco
+
+- Faça reset completo do ambiente Docker:
+
+```bash
+docker-compose down -v
+docker-compose up -d --build
+```
+
+### Frontend nao consegue chamar API
+
+- Verifique se a API esta de pe em http://localhost:8080.
+- Com Docker, teste o proxy pelo frontend: http://localhost:5173/api/rotas

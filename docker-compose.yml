@@ -30,5 +30,16 @@ services:
     ports:
       - "8080:8080"
 
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: onibus-frontend
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "5173:80"
+
 volumes:
   onibus_pgdata:

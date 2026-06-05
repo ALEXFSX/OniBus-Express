@@ -3,6 +3,7 @@
 **/.vscode
 **/bin
 **/obj
+**/node_modules
 **/TestResults
 **/*.user
 **/*.suo
