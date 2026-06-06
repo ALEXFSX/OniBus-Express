@@ -324,6 +324,10 @@ export default function ReservationDetailsPage({
                   <span className="text-text-muted">Rota</span>
                   <strong className="text-right text-text-main font-medium">{summary.route}</strong>
                 </div>
+                      <div className="flex items-center justify-between gap-6">
+                  <span className="text-text-muted">Codigo da viagem</span>
+                  <strong className="text-right text-text-main font-medium">{reservation.viagem.id}</strong>
+                </div>
                 <div className="flex items-center justify-between gap-6">
                   <span className="text-text-muted">Data</span>
                   <strong className="text-right text-text-main font-medium">{summary.date}</strong>
@@ -336,6 +340,7 @@ export default function ReservationDetailsPage({
                   <span className="text-text-muted">Assento</span>
                   <strong className="text-right text-text-main font-medium">Nº {reservation.numeroAssento}</strong>
                 </div>
+          
 
                 <div className="my-5 border-t border-dashed border-border" />
 

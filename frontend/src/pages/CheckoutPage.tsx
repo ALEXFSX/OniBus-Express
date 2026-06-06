@@ -359,6 +359,10 @@ export default function CheckoutPage({
                     <strong className="text-right text-text-main font-medium">{confirmationData.route}</strong>
                   </div>
                   <div className="flex items-center justify-between gap-6">
+                    <span className="text-text-muted">Cod. da Viagem</span>
+                    <strong className="text-right text-text-main font-medium">{tripId}</strong>
+                  </div>
+                  <div className="flex items-center justify-between gap-6">
                     <span className="text-text-muted">Data</span>
                     <strong className="text-right text-text-main font-medium">{confirmationData.date}</strong>
                   </div>
