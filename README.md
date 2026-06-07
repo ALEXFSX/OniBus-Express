@@ -104,24 +104,63 @@ Observacao:
 
 ## Testes
 
-### Rodar todos os testes do backend
+### Backend
+
+#### Rodar todos os testes do backend
 
 ```bash
 cd backend
 dotnet test --nologo
 ```
 
-### Rodar pela solucao
+#### Rodar pela solucao
 
 ```bash
 dotnet test backend/OniBusExpress.sln --nologo
 ```
 
-### Rodar somente projeto de testes
+#### Rodar somente projeto de testes
 
 ```bash
 dotnet test backend/tests/OniBusExpress.Tests/OniBusExpress.Tests.csproj --nologo
 ```
+
+### Frontend
+
+Os testes do frontend usam [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
+
+#### Pre-requisito
+
+Node.js 20+ e npm 10+ instalados.
+
+#### Instalar dependencias (apenas na primeira vez)
+
+```bash
+cd frontend
+npm install
+```
+
+#### Rodar os testes uma vez
+
+```bash
+cd frontend
+npm test
+```
+
+#### Rodar em modo watch (re-executa ao salvar)
+
+```bash
+cd frontend
+npm run test:watch
+```
+
+#### Cobertura dos testes
+
+| Arquivo de teste | Componente testado | O que cobre |
+|---|---|---|
+| `SearchForm.test.tsx` | `SearchForm` | Renderização dos campos, preenchimento e submissão, validação de campos vazios, erro de origem igual ao destino |
+| `SeatSelectionCard.test.tsx` | `SeatSelectionCard` | Exibição das informações da viagem, seleção de assento livre, bloqueio de assento ocupado, estado visual do assento selecionado, legenda |
+| `PassengerDataCard.test.tsx` | `PassengerDataCard` | Renderização dos campos, exibição de erros de validação (nome, CPF, e-mail), callback onChange, callback onSubmit, atributo aria-invalid |
 
 ## Endpoints principais
 
