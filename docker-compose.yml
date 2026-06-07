@@ -38,6 +38,12 @@ services:
     depends_on:
       api:
         condition: service_started
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Frontend disponivel em: http://localhost:5173"
+        exec nginx -g 'daemon off;'
     ports:
       - "5173:80"
 

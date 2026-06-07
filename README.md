@@ -20,6 +20,7 @@ docker-compose up -d --build
 Importante:
 - Ao clonar o projeto, voce nao precisa rodar build manual do frontend nesse fluxo.
 - O comando acima ja faz o build da imagem do frontend automaticamente.
+- Se estiver usando Docker, o Node não precisa estar instalado localmente, pois o build do frontend é feito dentro do container.
 
 ### 3. Acessar aplicacao
 
@@ -47,7 +48,7 @@ docker-compose down -v
 ### 1. Pre-requisitos
 
 - .NET SDK 8+
-- Node.js 20+
+- Node.js 20+ (necessário para rodar o frontend localmente)
 - npm 10+
 - PostgreSQL 16+
 
@@ -91,8 +92,9 @@ npm run dev
 ```
 
 Importante:
-- Nesse fluxo de desenvolvimento local, nao precisa rodar `npm run build` para iniciar.
-- O build do frontend (`npm run build`) e recomendado para validar o bundle de producao.
+- Nesse fluxo de desenvolvimento local, é necessário ter Node.js e npm instalados para rodar o frontend.
+- Nao precisa rodar `npm run build` para iniciar.
+- O build do frontend (`npm run build`) é recomendado para validar o bundle de produção.
 
 Frontend em desenvolvimento:
 - http://localhost:5173
@@ -136,16 +138,21 @@ dotnet test backend/tests/OniBusExpress.Tests/OniBusExpress.Tests.csproj --nolog
 
 - Se 5173, 8080 ou 5432 estiverem ocupadas, pare o processo que usa a porta ou ajuste mapeamentos no `docker-compose.yml`.
 
-### Erros por schema antigo de banco
+### Conflito de nome de container (ex: /onibus-db already in use)
 
-- Faça reset completo do ambiente Docker:
+Esse erro acontece quando ja existe um container antigo com o mesmo nome.
+
+Use a limpeza completa e suba novamente:
 
 ```bash
-docker-compose down -v
+docker-compose down -v --remove-orphans
+docker rm -f onibus-db onibus-api onibus-frontend 2>/dev/null || true
 docker-compose up -d --build
 ```
 
-### Frontend nao consegue chamar API
+Se quiser apenas reiniciar sem limpar volumes:
 
-- Verifique se a API esta de pe em http://localhost:8080.
-- Com Docker, teste o proxy pelo frontend: http://localhost:5173/api/rotas
+```bash
+docker-compose down
+docker-compose up -d --build
+```
