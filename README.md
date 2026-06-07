@@ -162,6 +162,28 @@ npm run test:watch
 | `SeatSelectionCard.test.tsx` | `SeatSelectionCard` | Exibição das informações da viagem, seleção de assento livre, bloqueio de assento ocupado, estado visual do assento selecionado, legenda |
 | `PassengerDataCard.test.tsx` | `PassengerDataCard` | Renderização dos campos, exibição de erros de validação (nome, CPF, e-mail), callback onChange, callback onSubmit, atributo aria-invalid |
 
+## Teste de cancelamento de reserva
+
+O projeto inclui uma viagem de demonstração gerada automaticamente na rota **Manaus → Boa Vista**, com partida ~2h04min após o `docker-compose up --build`. Ela é ideal para testar o fluxo completo de reserva e cancelamento.
+
+### Passo a passo
+
+1. Acesse o frontend em http://localhost:5173
+2. Busque pela rota:
+   - **Origem:** Manaus
+   - **Destino:** Boa Vista
+   - **Data:** data atual (dia em que o projeto foi iniciado)
+3. Selecione a viagem disponível e escolha um assento
+4. Preencha os dados do passageiro e confirme a compra
+5. Anote o **código da reserva** exibido na tela de sucesso (ex: `XXX-XXXXX`)
+6. Acesse http://localhost:5173/minha-reserva
+7. Digite o código da reserva e clique em **Consultar**
+8. Clique em **Cancelar reserva** para testar o cancelamento
+
+> O código da reserva também pode ser consultado via API: `GET http://localhost:8080/reservas/{codigo}`
+
+<img src="media/onibus_%20cancelamento.gif" alt="Fluxo de cancelamento de reserva" width="600" />
+
 ## Endpoints principais
 
 - GET /rotas
