@@ -65,7 +65,7 @@ const Seat = ({
 
   if (isOccupied) {
     seatClasses +=
-      " bg-background border border-background text-text-muted line-through cursor-not-allowed";
+      " bg-background border border-background text-text-muted !cursor-not-allowed opacity-50";
   } else if (isSelected) {
     seatClasses += " bg-primary border border-primary text-white";
   } else {
