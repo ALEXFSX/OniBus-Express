@@ -166,6 +166,10 @@ npm run test:watch
 
 O projeto inclui uma viagem de demonstração gerada automaticamente na rota **Manaus → Boa Vista**, com partida ~2h04min após o `docker-compose up --build`. Ela é ideal para testar o fluxo completo de reserva e cancelamento.
 
+### Fluxo completo de reserva
+
+<img src="media/onibus_reserva.gif" alt="Fluxo completo de reserva" width="600" />
+
 ### Passo a passo
 
 1. Acesse o frontend em http://localhost:5173
