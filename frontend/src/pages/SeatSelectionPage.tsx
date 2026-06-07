@@ -34,7 +34,6 @@ function formatTripDate(utcIsoDate: string) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "UTC",
   });
 }
 
@@ -42,7 +41,6 @@ function formatTripTime(utcIsoDate: string) {
   return new Date(utcIsoDate).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "UTC",
   });
 }
 
